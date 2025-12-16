@@ -35,13 +35,18 @@ export class UsersService {
     return { users, count, page, ITEM_PER_PAGE };
   }
 
-  // findOne(id: string) {
-  //   const user = this.users.find((user) => user.id === id);
-  //   if (!user) {
-  //     throw new NotFoundException('User not found');
-  //   }
-  //   return user;
-  // }
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async create(createUserDto: CreateUserDto) {
     const newUser = {
       ...createUserDto,
@@ -50,15 +55,23 @@ export class UsersService {
     return newUser;
   }
 
-  // update(id: string, updateUserDto: UpdateUserDto) {
-  //   const userIndex = this.users.findIndex((user) => user.id === id);
-  //   if (userIndex !== -1) {
-  //     return (this.users[userIndex] = {
-  //       ...this.users[userIndex],
-  //       ...updateUserDto,
-  //     });
-  //   } else {
-  //     throw new NotFoundException('User not found');
-  //   }
-  // }
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (user) {
+      return {
+        success: true,
+        message: 'User updated successfully',
+        data: await this.prisma.user.update({
+          where: { id: id },
+          data: { ...updateUserDto },
+        }),
+      };
+    } else {
+      throw new NotFoundException('User not found');
+    }
+  }
 }

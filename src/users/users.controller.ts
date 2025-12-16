@@ -21,10 +21,10 @@ export class UsersController {
     return this.userService.findAll(query, Number(page));
   }
 
-  // @Get(':id') //GET method to fetch a user by id /users/:id
-  // findOne(@Param('id') id: string) {
-  //   return this.userService.findOne(id);
-  // }
+  @Get(':id') //GET method to fetch a user by id /users/:id
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(id);
+  }
 
   @Post() //POST method to create a new /user
   create(
@@ -34,13 +34,13 @@ export class UsersController {
     return this.userService.create(createUserDto);
   }
 
-  // @Patch(':id') //PATCH method to update a user by id /users/:id
-  // update(
-  //   @Param('id') id: string,
-  //   @Body(ValidationPipe) updateUserDto: UpdateUserDto,
-  // ) {
-  //   return this.userService.update(id, updateUserDto);
-  // }
+  @Patch(':id') //PATCH method to update a user by id /users/:id
+  update(
+    @Param('id') id: string,
+    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserDto);
+  }
 
   // @Delete(':id') //DELETE method to delete a user by id /users/:id
   // remove(@Param('id') id: string) {
