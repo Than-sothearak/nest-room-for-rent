@@ -74,8 +74,11 @@ export class CreateUserDto {
   @IsBoolean()
   isAdmin?: boolean;
 
-  @IsEnum(Roles, { message: 'roles must be one of user, admin, or moderator' })
-  roles: string[];
+  @IsEnum(Roles, {
+    each: true,
+    message: 'roles must be one of user, admin, or moderator',
+  })
+  roles: Roles[];
 
   @IsOptional()
   @IsInt()

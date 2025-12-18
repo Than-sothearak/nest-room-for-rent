@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -24,7 +29,7 @@ export class UsersService {
         take: limit,
         orderBy: { createdAt: 'desc' },
       }),
-      this.prisma.user.count(), // ✅ await executed
+      this.prisma.user.count({ where }), // ✅ await executed
     ]);
 
     const totalPages = Math.ceil(count / limit);
@@ -56,8 +61,39 @@ export class UsersService {
     const newUser = {
       ...createUserDto,
     };
-    await this.prisma.user.create({ data: createUserDto });
-    return newUser;
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: createUserDto.username },
+          { email: createUserDto.email },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        existingUser.username === createUserDto.username
+          ? 'Username already exists'
+          : ' Email already exists',
+        HttpStatus.CONFLICT,
+      );
+    }
+    try {
+      const createdUser = await this.prisma.user.create({
+        data: newUser,
+      });
+      return {
+        success: true,
+        message: 'User created successfully',
+        data: createdUser,
+      };
+    } catch (error) {
+      throw new HttpException(
+        `An error occurred during user creation.+ ${error}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
